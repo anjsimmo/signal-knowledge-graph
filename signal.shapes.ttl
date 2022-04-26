@@ -20,6 +20,17 @@ signal:Action
   a sh:NodeShape ;
   rdfs:subClassOf owl:Thing ;
 .
+signal:BCEast
+  a signal:Location ;
+.
+signal:BCSouthEast
+  a signal:Location ;
+.
+signal:Barrier
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf signal:Object ;
+.
 signal:Behaviour
   a owl:Class ;
   a sh:NodeShape ;
@@ -65,6 +76,11 @@ signal:Object
   a sh:NodeShape ;
   rdfs:subClassOf owl:Thing ;
 .
+signal:Person
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf signal:Object ;
+.
 signal:ReceiverModel
   a owl:Class ;
   a sh:NodeShape ;
@@ -79,6 +95,11 @@ signal:Signal
   a owl:Class ;
   a sh:NodeShape ;
   rdfs:subClassOf owl:Thing ;
+.
+signal:Space
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf signal:Object ;
 .
 signal:SummarisationModel
   a owl:Class ;
@@ -115,10 +136,32 @@ signal:altitude
   rdfs:domain signal:Location ;
   rdfs:range xsd:decimal ;
 .
+signal:attacker
+  a signal:Person ;
+.
+signal:attackerBehaviour
+  a signal:Behaviour ;
+  signal:actor signal:attacker ;
+  signal:actsOn signal:window ;
+  signal:produces signal:breakWindow ;
+.
 signal:attenuatedBy
   a owl:ObjectProperty ;
   rdfs:domain signal:ReceiverModel ;
   rdfs:range signal:Object ;
+.
+signal:audioset
+  a signal:Dataset ;
+  signal:contains signal:soundOfGlass ;
+  signal:derivedFrom signal:youtube ;
+.
+signal:breakWindow
+  a signal:Action ;
+.
+signal:breakWindowEmission
+  a signal:Emission ;
+  signal:creates signal:soundOfGlass ;
+  signal:emissionAction signal:breakWindow ;
 .
 signal:composes
   a owl:ObjectProperty ;
@@ -145,10 +188,31 @@ signal:detectedAs
   rdfs:domain signal:ReceiverModel ;
   rdfs:range signal:Signal ;
 .
+signal:diningArea
+  a signal:Space ;
+  signal:loc signal:BCSouthEast ;
+.
+signal:dropGlassEmission
+  a signal:Emission ;
+  signal:creates signal:soundOfGlass ;
+  signal:emissionAction signal:dropTray ;
+.
+signal:dropTray
+  a signal:Action ;
+.
 signal:emissionAction
   a owl:ObjectProperty ;
   rdfs:domain signal:Emission ;
   rdfs:range signal:Action ;
+.
+signal:employee
+  a signal:Person ;
+.
+signal:employeeBehaviour
+  a signal:Behaviour ;
+  signal:actor signal:employee ;
+  signal:actsOn signal:diningArea ;
+  signal:produces signal:dropTray ;
 .
 signal:fallOff
   a owl:ObjectProperty ;
@@ -160,10 +224,16 @@ signal:input
   rdfs:domain signal:SummarisationModel ;
   rdfs:range signal:Signal ;
 .
+signal:inverseSquare
+  a signal:FallOff ;
+.
 signal:latitude
   a owl:DatatypeProperty ;
   rdfs:domain signal:Location ;
   rdfs:range xsd:decimal ;
+.
+signal:linear
+  a signal:Composition ;
 .
 signal:loc
   a owl:ObjectProperty ;
@@ -208,8 +278,46 @@ signal:signalToNoiseRatio
   rdfs:domain signal:Sensor ;
   rdfs:range xsd:decimal ;
 .
+signal:smartlavplusMicrophone
+  a signal:Sensor ;
+  signal:loc signal:BCEast ;
+.
+signal:soundOfGlass
+  a signal:Signal ;
+.
+signal:soundPrVector
+  a signal:SummarisedPrVector ;
+.
+signal:soundReceiverModel
+  a signal:ReceiverModel ;
+  signal:attenuatedBy signal:window ;
+  signal:composes signal:linear ;
+  signal:detectedAs signal:soundOfGlass ;
+  signal:fallOff signal:inverseSquare ;
+  signal:producedBy signal:soundOfGlass ;
+.
+signal:soundSignal
+  a signal:Signal ;
+.
 signal:trainedOn
   a owl:ObjectProperty ;
   rdfs:domain signal:ClassifierModel ;
   rdfs:range signal:Dataset ;
+.
+signal:wall
+  a signal:Barrier ;
+  signal:loc signal:BCSouthEast ;
+.
+signal:window
+  a signal:Barrier ;
+  signal:loc signal:BCEast ;
+.
+signal:yamnet
+  a signal:ClassifierModel ;
+  signal:input signal:soundOfGlass ;
+  signal:outputs signal:soundPrVector ;
+  signal:trainedOn signal:audioset ;
+.
+signal:youtube
+  a signal:Dataset ;
 .
