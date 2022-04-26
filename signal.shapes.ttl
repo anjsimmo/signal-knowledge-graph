@@ -79,6 +79,11 @@ signal:Object
   a sh:NodeShape ;
   rdfs:subClassOf owl:Thing ;
 .
+signal:Observation
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
 signal:Person
   a owl:Class ;
   a sh:NodeShape ;
@@ -248,6 +253,23 @@ signal:longitude
   rdfs:domain signal:Location ;
   rdfs:range xsd:decimal ;
 .
+signal:observation1
+  a signal:Observation ;
+  signal:observedBy signal:smartlavplusMicrophone ;
+  signal:observedSignal signal:soundOfGlass ;
+  signal:time "2022-04-26T11:53:00Z"^^xsd:dateTime ;
+  signal:value 0.8 ;
+.
+signal:observedBy
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Observation ;
+  rdfs:range signal:Sensor ;
+.
+signal:observedSignal
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Observation ;
+  rdfs:range signal:Signal ;
+.
 signal:outputs
   a owl:ObjectProperty ;
   rdfs:domain signal:SummarisationModel ;
@@ -311,10 +333,20 @@ signal:soundReceiverModel
 signal:soundSignal
   a signal:Signal ;
 .
+signal:time
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:Observation ;
+  rdfs:range xsd:dateTime ;
+.
 signal:trainedOn
   a owl:ObjectProperty ;
   rdfs:domain signal:ClassifierModel ;
   rdfs:range signal:Dataset ;
+.
+signal:value
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:Observation ;
+  rdfs:range xsd:decimal ;
 .
 signal:wall
   a signal:Barrier ;
