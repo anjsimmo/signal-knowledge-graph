@@ -1,5 +1,6 @@
 # baseURI: http://a2i2.deakin.edu.au/signal
 # imports: http://datashapes.org/dash
+# imports: http://www.w3.org/2004/02/skos/core#
 # prefix: signal
 
 @prefix dash: <http://datashapes.org/dash#> .
@@ -8,11 +9,13 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix signal: <http://a2i2.deakin.edu.au/signal#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 <http://a2i2.deakin.edu.au/signal>
   a owl:Ontology ;
   owl:imports <http://datashapes.org/dash> ;
+  owl:imports skos: ;
   owl:versionInfo "Created with TopBraid Composer" ;
 .
 signal:Action
@@ -94,7 +97,7 @@ signal:Sensor
 signal:Signal
   a owl:Class ;
   a sh:NodeShape ;
-  rdfs:subClassOf owl:Thing ;
+  rdfs:subClassOf skos:Concept ;
 .
 signal:Space
   a owl:Class ;
@@ -160,7 +163,7 @@ signal:breakWindow
 .
 signal:breakWindowEmission
   a signal:Emission ;
-  signal:creates signal:soundOfGlass ;
+  signal:creates signal:soundOfBreakingGlass ;
   signal:emissionAction signal:breakWindow ;
 .
 signal:composes
@@ -194,7 +197,7 @@ signal:diningArea
 .
 signal:dropGlassEmission
   a signal:Emission ;
-  signal:creates signal:soundOfGlass ;
+  signal:creates signal:soundOfDroppedGlass ;
   signal:emissionAction signal:dropTray ;
 .
 signal:dropTray
@@ -282,8 +285,17 @@ signal:smartlavplusMicrophone
   a signal:Sensor ;
   signal:loc signal:BCEast ;
 .
+signal:soundOfBreakingGlass
+  a signal:Signal ;
+  skos:broader signal:soundOfGlass ;
+.
+signal:soundOfDroppedGlass
+  a signal:Signal ;
+  skos:broader signal:soundOfGlass ;
+.
 signal:soundOfGlass
   a signal:Signal ;
+  skos:broader signal:soundSignal ;
 .
 signal:soundPrVector
   a signal:SummarisedPrVector ;
