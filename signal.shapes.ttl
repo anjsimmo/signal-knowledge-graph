@@ -1,0 +1,215 @@
+# baseURI: http://a2i2.deakin.edu.au/signal
+# imports: http://datashapes.org/dash
+# prefix: signal
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix signal: <http://a2i2.deakin.edu.au/signal#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://a2i2.deakin.edu.au/signal>
+  a owl:Ontology ;
+  owl:imports <http://datashapes.org/dash> ;
+  owl:versionInfo "Created with TopBraid Composer" ;
+.
+signal:Action
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:Behaviour
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:ClassifierModel
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf signal:SummarisationModel ;
+.
+signal:Composition
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:Dataset
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:Emission
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:FallOff
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:Flux
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:Location
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:Object
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:ReceiverModel
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:Sensor
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf signal:Object ;
+.
+signal:Signal
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:SummarisationModel
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:SummarisedPrVector
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf signal:SummarisedSignal ;
+.
+signal:SummarisedSignal
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
+signal:accuracy
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:ClassifierModel ;
+  rdfs:range xsd:decimal ;
+.
+signal:actor
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Behaviour ;
+  rdfs:range signal:Object ;
+.
+signal:actsOn
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Behaviour ;
+  rdfs:range signal:Object ;
+.
+signal:altitude
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:Location ;
+  rdfs:range xsd:decimal ;
+.
+signal:attenuatedBy
+  a owl:ObjectProperty ;
+  rdfs:domain signal:ReceiverModel ;
+  rdfs:range signal:Object ;
+.
+signal:composes
+  a owl:ObjectProperty ;
+  rdfs:domain signal:ReceiverModel ;
+  rdfs:range signal:Composition ;
+.
+signal:contains
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Dataset ;
+  rdfs:range signal:Signal ;
+.
+signal:creates
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Emission ;
+  rdfs:range signal:Signal ;
+.
+signal:derivedFrom
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Dataset ;
+  rdfs:range signal:Dataset ;
+.
+signal:detectedAs
+  a owl:ObjectProperty ;
+  rdfs:domain signal:ReceiverModel ;
+  rdfs:range signal:Signal ;
+.
+signal:emissionAction
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Emission ;
+  rdfs:range signal:Action ;
+.
+signal:fallOff
+  a owl:ObjectProperty ;
+  rdfs:domain signal:ReceiverModel ;
+  rdfs:range signal:FallOff ;
+.
+signal:input
+  a owl:ObjectProperty ;
+  rdfs:domain signal:SummarisationModel ;
+  rdfs:range signal:Signal ;
+.
+signal:latitude
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:Location ;
+  rdfs:range xsd:decimal ;
+.
+signal:loc
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Object ;
+  rdfs:range signal:Location ;
+.
+signal:longitude
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:Location ;
+  rdfs:range xsd:decimal ;
+.
+signal:outputs
+  a owl:ObjectProperty ;
+  rdfs:domain signal:SummarisationModel ;
+  rdfs:range signal:SummarisedSignal ;
+.
+signal:pr
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:Behaviour ;
+  rdfs:range xsd:decimal ;
+.
+signal:precision
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:ClassifierModel ;
+.
+signal:producedBy
+  a owl:ObjectProperty ;
+  rdfs:domain signal:ReceiverModel ;
+  rdfs:range signal:Signal ;
+.
+signal:produces
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Behaviour ;
+  rdfs:range signal:Action ;
+.
+signal:recall
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:ClassifierModel ;
+.
+signal:signalToNoiseRatio
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:Sensor ;
+  rdfs:range xsd:decimal ;
+.
+signal:trainedOn
+  a owl:ObjectProperty ;
+  rdfs:domain signal:ClassifierModel ;
+  rdfs:range signal:Dataset ;
+.
