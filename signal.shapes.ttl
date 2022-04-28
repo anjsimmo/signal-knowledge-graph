@@ -25,9 +25,13 @@ signal:Action
 .
 signal:BCEast
   a signal:Location ;
+  signal:locx "1"^^xsd:decimal ;
+  signal:locy "0"^^xsd:decimal ;
 .
 signal:BCSouthEast
   a signal:Location ;
+  signal:locx "1"^^xsd:decimal ;
+  signal:locy "-1"^^xsd:decimal ;
 .
 signal:Barrier
   a owl:Class ;
@@ -139,18 +143,15 @@ signal:actsOn
   rdfs:domain signal:Behaviour ;
   rdfs:range signal:Object ;
 .
-signal:altitude
-  a owl:DatatypeProperty ;
-  rdfs:domain signal:Location ;
-  rdfs:range xsd:decimal ;
-.
 signal:attacker
   a signal:Person ;
+  signal:pr_exists 0.1 ;
 .
 signal:attackerBehaviour
   a signal:Behaviour ;
   signal:actor signal:attacker ;
   signal:actsOn signal:window ;
+  signal:pr 0.5 ;
   signal:produces signal:breakWindow ;
 .
 signal:attenuatedBy
@@ -215,11 +216,13 @@ signal:emissionAction
 .
 signal:employee
   a signal:Person ;
+  signal:pr_exists 0.9 ;
 .
 signal:employeeBehaviour
   a signal:Behaviour ;
   signal:actor signal:employee ;
   signal:actsOn signal:diningArea ;
+  signal:pr 0.1 ;
   signal:produces signal:dropTray ;
 .
 signal:fallOff
@@ -235,11 +238,6 @@ signal:input
 signal:inverseSquare
   a signal:FallOff ;
 .
-signal:latitude
-  a owl:DatatypeProperty ;
-  rdfs:domain signal:Location ;
-  rdfs:range xsd:decimal ;
-.
 signal:linear
   a signal:Composition ;
 .
@@ -248,10 +246,25 @@ signal:loc
   rdfs:domain signal:Object ;
   rdfs:range signal:Location ;
 .
-signal:longitude
+signal:locx
   a owl:DatatypeProperty ;
   rdfs:domain signal:Location ;
   rdfs:range xsd:decimal ;
+.
+signal:locy
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:Location ;
+  rdfs:range xsd:decimal ;
+.
+signal:locz
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:Location ;
+  rdfs:range xsd:decimal ;
+.
+signal:model
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Sensor ;
+  rdfs:range signal:SummarisationModel ;
 .
 signal:observation1
   a signal:Observation ;
@@ -280,9 +293,10 @@ signal:pr
   rdfs:domain signal:Behaviour ;
   rdfs:range xsd:decimal ;
 .
-signal:precision
+signal:pr_exists
   a owl:DatatypeProperty ;
-  rdfs:domain signal:ClassifierModel ;
+  rdfs:domain signal:Person ;
+  rdfs:range xsd:decimal ;
 .
 signal:producedBy
   a owl:ObjectProperty ;
@@ -294,9 +308,10 @@ signal:produces
   rdfs:domain signal:Behaviour ;
   rdfs:range signal:Action ;
 .
-signal:recall
+signal:sensitivity
   a owl:DatatypeProperty ;
   rdfs:domain signal:ClassifierModel ;
+  rdfs:range xsd:decimal ;
 .
 signal:signalToNoiseRatio
   a owl:DatatypeProperty ;
@@ -306,6 +321,8 @@ signal:signalToNoiseRatio
 signal:smartlavplusMicrophone
   a signal:Sensor ;
   signal:loc signal:BCEast ;
+  signal:model signal:yamnet ;
+  signal:signalToNoiseRatio "67"^^xsd:decimal ;
 .
 signal:soundOfBreakingGlass
   a signal:Signal ;
@@ -332,6 +349,11 @@ signal:soundReceiverModel
 .
 signal:soundSignal
   a signal:Signal ;
+.
+signal:specificity
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:ClassifierModel ;
+  rdfs:range xsd:decimal ;
 .
 signal:time
   a owl:DatatypeProperty ;
@@ -360,6 +382,8 @@ signal:yamnet
   a signal:ClassifierModel ;
   signal:input signal:soundOfGlass ;
   signal:outputs signal:soundPrVector ;
+  signal:sensitivity 0.9 ;
+  signal:specificity 0.9 ;
   signal:trainedOn signal:audioset ;
 .
 signal:youtube
