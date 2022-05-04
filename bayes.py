@@ -58,6 +58,9 @@ class BayesNode:
         row = (condition_vals, output_value_prs)
         self.rows.append(row)
     
+    def get_output_vals(self):
+        return self.output_vals
+    
     def __repr__(self):
         s = f"==={self.name}===\n"
         header = []

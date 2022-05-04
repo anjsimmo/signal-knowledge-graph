@@ -215,17 +215,22 @@ def pr_det_given_signal_strength(causal_graph):
         n.add_output_value(0)
         
         # [(0, 0, 0, 0, 0), (0, 0, 0, 0, 1), ...]
-        combos = itertools.product([0,1], repeat=len(strength_nodes))
+        #combos = itertools.product([0,1], repeat=len(strength_nodes))
+        strength_combos = []
+        for sn in strength_nodes:
+            strength_combos.append(sn.output_vals)
+        combos = itertools.product(*strength_combos)
         for combo in combos:
             row_condition = list(combo)
 
-            strengths = []
-            for i, c in enumerate(combo):
-                if c == 0:
-                    continue
-                strengths.append(strength_nodes[i].strength)
+            # strengths = []
+            # for i, c in enumerate(combo):
+            #     if c == 0:
+            #         continue
+            #     strengths.append(strength_nodes[i].strength)
+            # max_strenth = max([0] + strengths)
             
-            max_strenth = max([0] + strengths)
+            max_strenth = max([0] + row_condition)
             pr_det = pr_det_given_signal_strength_helper(max_strenth, 1, sensitivity, specificity)
             
             n.add_row(row_condition,[pr_det, 1 - pr_det])
