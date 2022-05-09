@@ -101,7 +101,32 @@ class BayesGraph:
         # Return true if simulation is consistent with hypothesised node_output_val
         assert node_hypo in sampled_values
         return sampled_values[node_hypo] == node_output_val
-
+    
+    def to_bif(self):
+        # Write bif output (old style) reverse enginered from bnlearn examples at https://www.bnlearn.com/bnrepository/
+        s = """network unknown {
+}"""
+        for n in self.nodes:
+            s += f"""
+variable {n.name} {{
+  type discrete [ {len(n.output_vals)} ] {{ {", ".join(str(x) for x in n.output_vals)} }}
+}}"""
+        for n in self.nodes:
+            if not n.condition_nodes:
+                s += f"""
+probability ( {n.name} ) {{
+  table {", ".join(str(x) for x in n.rows[0][1])};
+}}"""
+            else:
+                s += f"""
+probability ( {n.name} | {", ".join(n.condition_node_names)} ) """ + "{"
+                for r in n.rows:
+                    s += f"""
+  ({", ".join(str(x) for x in r[0])}) {", ".join(str(x) for x in r[1])};"""
+                s += """
+}"""
+        s += "\n"
+        return s
 
 # conditional probability table
 # Designed to be similar to tool at http://www.cs.man.ac.uk/~gbrown/bayes_nets

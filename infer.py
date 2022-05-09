@@ -306,3 +306,6 @@ if __name__ == "__main__":
     alarm, causal_graph = monitor_step()
     print(causal_graph)
     print(f"{alarm}")
+    
+    with open("infer.bif", "w") as f:
+        f.write(causal_graph.to_bif())
