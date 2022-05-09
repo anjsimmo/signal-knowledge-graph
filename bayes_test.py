@@ -46,3 +46,13 @@ bg.add_node(j)
 bg.add_node(m)
 
 print(bg)
+
+# condtional upon observation
+obs_node = bg.get_node("marycalls")
+obs_node.fix_value(1)
+
+node_of_interest = bg.get_node("burgulary")
+val_of_interest = 1
+posterior_pr, num_hypo, num_valid = bg.get_posterior(node_of_interest, val_of_interest, sims_count=10000)
+
+print(f"{posterior_pr}, {num_hypo}/{num_valid}")

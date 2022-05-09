@@ -1,14 +1,15 @@
 import math
 import itertools
+from collections import namedtuple
+from rdflib import Graph, Namespace, RDF, SKOS
 from bayes import BayesGraph, BayesNode
 
-from rdflib import Graph, Namespace, RDF, SKOS
 g = Graph()
 g.parse('signal.shapes.ttl', format='ttl')
 
-import pprint
-for stmt in g:
-    pprint.pprint(stmt)
+# import pprint
+# for stmt in g:
+#     pprint.pprint(stmt)
 
 # V1
 # Simulate all possible universes
@@ -29,11 +30,12 @@ for stmt in g:
 
 
 signal = Namespace("http://a2i2.deakin.edu.au/signal#")
+Posterior = namedtuple("Posterior", ["pr", "num_hypo", "num_valid"])
 
-causal_graph = BayesGraph()
 
 def get_name(uriref):
     return uriref.split('#')[-1]
+
 
 def pr_actor(causal_graph):
     persons = list(g.subjects(RDF.type, signal.Person))
@@ -47,10 +49,6 @@ def pr_actor(causal_graph):
         nodes.append(n)
     return nodes
 
-actor_nodes = pr_actor(causal_graph)
-print(actor_nodes)
-for n in actor_nodes:
-    causal_graph.add_node(n)
 
 def pr_action_given_actor(causal_graph):
     nodes = []
@@ -80,10 +78,6 @@ def pr_action_given_actor(causal_graph):
                      nodes.append(n)
     return nodes
 
-action_nodes = pr_action_given_actor(causal_graph)
-print(action_nodes)
-for n in action_nodes:
-    causal_graph.add_node(n)
 
 def pr_signal_given_action(causal_graph):
     emissions = g.subjects(RDF.type, signal.Emission)
@@ -108,10 +102,6 @@ def pr_signal_given_action(causal_graph):
                     nodes.append(n)
     return nodes
 
-signal_nodes = pr_signal_given_action(causal_graph)
-print(signal_nodes)
-for n in signal_nodes:
-    causal_graph.add_node(n)
 
 def inverse_square_fall_off(dist):
     # TODO: Convert to decibels?
@@ -120,6 +110,7 @@ def inverse_square_fall_off(dist):
 
     return 1 / dist**2
 
+
 def dist(loca, locb):
     x1 = float(g.value(loca, signal.locx).value)
     y1 = float(g.value(loca, signal.locy).value)
@@ -127,6 +118,7 @@ def dist(loca, locb):
     y2 = float(g.value(locb, signal.locy).value)
     # TODO: perform geodesic calculation (or just use x, y coordinate system instead)
     return math.sqrt((x2-x1)**2 + (y2-y1)**2)
+
 
 def pr_signal_strength_given_signal(causal_graph):
     # TODO: Get action locations!!!!
@@ -160,18 +152,15 @@ def pr_signal_strength_given_signal(causal_graph):
             n.add_output_value(reduction_factor)
             n.add_output_value(0)
             n.add_row([0],[0,1])
-            n.add_row([reduction_factor],[1,0])
+            n.add_row([1],[1,0])
             nodes.append(n)
     return nodes
 
-strength_nodes = pr_signal_strength_given_signal(causal_graph)
-print(strength_nodes)
-for n in strength_nodes:
-    causal_graph.add_node(n)
 
 # https://stackoverflow.com/questions/3985619/how-to-calculate-a-logistic-sigmoid-function-in-python
 def sigmoid(x):
     return 1 / (1 + math.exp(-x))
+
 
 def pr_det_given_signal_strength_helper(sig_strength, ref_signal, sensitivity, specificity):
     # TODO: depends on whether using power, or decibel scale
@@ -240,42 +229,80 @@ def pr_det_given_signal_strength(causal_graph):
     return nodes
 
 
-det_nodes = pr_det_given_signal_strength(causal_graph)
-print(det_nodes)
-for n in det_nodes:
-    causal_graph.add_node(n)
+def fix_observation_values(causal_graph):
+    observations = list(g.subjects(RDF.type, signal.Observation))
+
+    for obs in observations:
+        sensor = g.value(obs, signal.observedBy)
+        sig = g.value(obs, signal.observedSignal)
+        val = g.value(obs, signal.value)
+        
+        n = causal_graph.get_node("det_" + get_name(sensor) + "_" + get_name(sig))
+        n.fix_value(int(val))
+
 
 def gen_causal_graph():
-    pass
-    # causal_graph = BayesGraph()
-    # 
-    # a = pr_actor()
-    # act = pr_action_given_actor()
-    # sig = pr_signal_given_action()
-    # strength = pr_signal_given_action()
-    # det = pr_det_given_signal_strength()
-    # 
-    # causal_graph.add_node(a)
-    # causal_graph.add_node(act)
-    # causal_graph.add_node(sig)
-    # causal_graph.add_node(strength)
-    # causal_graph.add_node(det)
-    # 
-    # return causal_graph
+    causal_graph = BayesGraph()
+
+    actor_nodes = pr_actor(causal_graph)
+    for n in actor_nodes:
+        causal_graph.add_node(n)
+
+    action_nodes = pr_action_given_actor(causal_graph)
+    for n in action_nodes:
+        causal_graph.add_node(n)
+
+    signal_nodes = pr_signal_given_action(causal_graph)
+    for n in signal_nodes:
+        causal_graph.add_node(n)
+
+    strength_nodes = pr_signal_strength_given_signal(causal_graph)
+    for n in strength_nodes:
+        causal_graph.add_node(n)
+
+    det_nodes = pr_det_given_signal_strength(causal_graph)
+    for n in det_nodes:
+        causal_graph.add_node(n)
+    
+    return causal_graph
 
 
-def infer_actor_pr(actor, causal_graph, obs):
-    pass
+class Alarm:
+    def __init__(self):
+        self.alarm = False
+        self.msg = ""
+    
+    def warn(self, pr, msg):
+        self.msg = msg
+
+    def alert(self):
+        self.alarm = True
+    
+    def __repr__(self):
+        return f"alarm={self.alarm} - {self.msg}"
 
 
-def monitor_step(obs):
-    alarm = False
-    def raise_alarm():
-        alarm = True
+def infer_actor_pr(causal_graph, actor_name, actor_val):
+    n = causal_graph.get_node(actor_name)
+    posterior_pr, num_hypo, num_valid = causal_graph.get_posterior(n, actor_val, sims_count=10000)
+    return Posterior(pr = posterior_pr, num_hypo = num_hypo, num_valid = num_valid)
+
+
+def monitor_step():
+    alarm = Alarm()
         
     causal_graph = gen_causal_graph()
-    posterior_cause = infer_actor_pr(causal_graph, obs)
-    if posterior_cause.get_probability("attacker") > 0.5:
-        raise_alarm()
-    return alarm
+    fix_observation_values(causal_graph)
+    
+    posterior_cause = infer_actor_pr(causal_graph, "attacker", 1)
+    if posterior_cause.pr > 0.5:
+        alarm.alert()
+    if posterior_cause.pr > 0:
+        msg = f"Attacker in {posterior_cause.num_hypo}/{posterior_cause.num_valid} sims => Pr(attacker) = {posterior_cause.pr}"
+        alarm.warn(posterior_cause.pr, msg)
+    return alarm, causal_graph
 
+if __name__ == "__main__":
+    alarm, causal_graph = monitor_step()
+    print(causal_graph)
+    print(f"{alarm}")

@@ -271,7 +271,7 @@ signal:observation1
   signal:observedBy signal:smartlavplusMicrophone ;
   signal:observedSignal signal:soundOfGlass ;
   signal:time "2022-04-26T11:53:00Z"^^xsd:dateTime ;
-  signal:value 0.8 ;
+  signal:value 1 ;
 .
 signal:observedBy
   a owl:ObjectProperty ;
