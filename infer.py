@@ -33,6 +33,11 @@ signal = Namespace("http://a2i2.deakin.edu.au/signal#")
 Posterior = namedtuple("Posterior", ["pr", "num_hypo", "num_valid"])
 
 
+def _capitalise(s):
+    # capitalise just the first letter, leave rest as is
+    return s[0:1].upper() + s[1:]
+
+
 def get_name(uriref):
     return uriref.split('#')[-1]
 
@@ -75,6 +80,7 @@ def pr_action_given_actor(causal_graph):
                      n.add_output_value(0)
                      n.add_row([0],[0,1])
                      n.add_row([1],[pr,1-pr])
+                     n.shortname = get_name(action)
                      nodes.append(n)
     return nodes
 
@@ -99,6 +105,7 @@ def pr_signal_given_action(causal_graph):
                     n.add_output_value(0)
                     n.add_row([0],[0,1])
                     n.add_row([1],[1,0])
+                    n.shortname = get_name(sig)
                     nodes.append(n)
     return nodes
 
@@ -153,6 +160,7 @@ def pr_signal_strength_given_signal(causal_graph):
             n.add_output_value(0)
             n.add_row([0],[0,1])
             n.add_row([1],[1,0])
+            n.shortname = get_name(n.sig) + "Strength"
             nodes.append(n)
     return nodes
 
@@ -223,7 +231,8 @@ def pr_det_given_signal_strength(causal_graph):
             pr_det = pr_det_given_signal_strength_helper(max_strenth, 1, sensitivity, specificity)
             
             n.add_row(row_condition,[pr_det, 1 - pr_det])
-        
+
+        n.shortname = get_name(sensor) + "Detects" + _capitalise(get_name(observed_signal))
         nodes.append(n)
 
     return nodes
@@ -304,7 +313,9 @@ def monitor_step():
 
 if __name__ == "__main__":
     alarm, causal_graph = monitor_step()
+    causal_graph.use_shortnames()
     print(causal_graph)
+    
     print(f"{alarm}")
     
     with open("infer.bif", "w") as f:

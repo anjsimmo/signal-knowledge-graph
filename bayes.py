@@ -127,6 +127,19 @@ probability ( {n.name} | {", ".join(n.condition_node_names)} ) """ + "{"
 }"""
         s += "\n"
         return s
+        
+    def use_shortnames(self):
+        i = 1
+        seen_names = set()
+        for n in self.nodes:
+            if n.shortname in seen_names:
+                n.name = f"{n.shortname}{i}"
+                i += 1
+            else:
+                n.name = n.shortname
+                seen_names.add(n.name)
+        for n in self.nodes:
+            n.condition_node_names = [cn.name for cn in n.condition_nodes]
 
 # conditional probability table
 # Designed to be similar to tool at http://www.cs.man.ac.uk/~gbrown/bayes_nets
@@ -140,6 +153,7 @@ class BayesNode:
         self.fixed_value = None
         # condition_vals -> output_value_prs
         self.condition_to_prs = {}
+        self.shortname = self.name
     
     def add_condition(self, condition_node):
         self.condition_nodes.append(condition_node)
