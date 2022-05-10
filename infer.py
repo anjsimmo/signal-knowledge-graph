@@ -232,7 +232,7 @@ def pr_det_given_signal_strength(causal_graph):
             
             n.add_row(row_condition,[pr_det, 1 - pr_det])
 
-        n.shortname = get_name(sensor) + "Detects" + _capitalise(get_name(observed_signal))
+        n.shortname = "detect" + _capitalise(get_name(observed_signal))
         nodes.append(n)
 
     return nodes
