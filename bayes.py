@@ -129,15 +129,16 @@ probability ( {n.name} | {", ".join(n.condition_node_names)} ) """ + "{"
         return s
         
     def use_shortnames(self):
-        i = 1
-        seen_names = set()
+        # shortname -> count of nodes with this name
+        shortname_count = {}
         for n in self.nodes:
-            if n.shortname in seen_names:
-                n.name = f"{n.shortname}{i}"
-                i += 1
+            if n.shortname in shortname_count:
+                shortname_count[n.shortname] += 1
+                n.name = f"{n.shortname}{shortname_count[n.shortname]}"
             else:
+                shortname_count[n.shortname] = 1
                 n.name = n.shortname
-                seen_names.add(n.name)
+
         for n in self.nodes:
             n.condition_node_names = [cn.name for cn in n.condition_nodes]
 
