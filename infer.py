@@ -140,7 +140,17 @@ def pr_signal_strength_given_signal(causal_graph):
     
     nodes = []
     for sensor, sensor_loc in sensor_locs:
+        sensor_model = g.value(sensor, signal.model)
+        sensor_observed_signals = set(g.objects(sensor_model, signal.input))
+        sensor_signals = set(b for obs_sig in sensor_observed_signals for b in get_narrower_signals(obs_sig))
+        sensor_signals |= set(b for obs_sig in sensor_observed_signals for b in get_broader_signals(obs_sig))
+        sensor_signals |= sensor_observed_signals
+        
         for signal_node in signal_nodes:
+            if not signal_node.sig in sensor_signals:
+                # sensor can't detect this kind of signal, so ignore
+                continue
+
             actor = signal_node.actor
             source_loc = signal_node.source_loc
             
@@ -168,6 +178,18 @@ def pr_signal_strength_given_signal(causal_graph):
 # https://stackoverflow.com/questions/3985619/how-to-calculate-a-logistic-sigmoid-function-in-python
 def sigmoid(x):
     return 1 / (1 + math.exp(-x))
+
+
+def get_narrower_signals(observed_signal):
+    # TODO: Recurse
+    narrower_signals = g.subjects(SKOS.broader, observed_signal)
+    return narrower_signals
+
+
+def get_broader_signals(observed_signal):
+    # TODO: Recurse
+    broader_signals = g.objects(SKOS.broader, observed_signal)
+    return broader_signals
 
 
 def pr_det_given_signal_strength_helper(sig_strength, ref_signal, sensitivity, specificity):
@@ -198,10 +220,9 @@ def pr_det_given_signal_strength(causal_graph):
     for sensor, observed_signal, sensitivity, specificity in sensor_obs:
         #print("DEBUG: " + "_signal_" + get_name(observed_signal) + "_" + get_name(sensor) + "_strength")
         
-        # TODO: Recurse
-        broader_signals = g.subjects(SKOS.broader, observed_signal)
+        narrower_signals = get_narrower_signals(observed_signal)
         strength_nodes = []
-        for sig in broader_signals:
+        for sig in narrower_signals:
             strength_nodes += causal_graph.get_nodes("_signal_" + get_name(sig) + "_" + get_name(sensor) + "_strength")
         
         n = BayesNode("det_" + get_name(sensor) + "_" + get_name(observed_signal))

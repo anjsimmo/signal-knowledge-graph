@@ -43,6 +43,9 @@ signal:Behaviour
   a sh:NodeShape ;
   rdfs:subClassOf owl:Thing ;
 .
+signal:COCO2017
+  a signal:Dataset ;
+.
 signal:ClassifierModel
   a owl:Class ;
   a sh:NodeShape ;
@@ -97,6 +100,15 @@ signal:ReceiverModel
   a owl:Class ;
   a sh:NodeShape ;
   rdfs:subClassOf owl:Thing ;
+.
+signal:SSDMobileNetv2
+  a signal:ClassifierModel ;
+  signal:input signal:visibleKnife ;
+  signal:mAP 22.2 ;
+  signal:outputs signal:objectPrVector ;
+  signal:sensitivity 0.9 ;
+  signal:specificity 0.9 ;
+  signal:trainedOn signal:COCO2017 ;
 .
 signal:Sensor
   a owl:Class ;
@@ -154,6 +166,14 @@ signal:attackerBehaviour
   signal:pr 0.5 ;
   signal:produces signal:breakWindow ;
 .
+signal:attackerBehaviourCarryWeaponKnife
+  a signal:Behaviour ;
+  signal:actor signal:attacker ;
+  signal:actsOn signal:diningArea ;
+  signal:actsOn signal:window ;
+  signal:pr 0.5 ;
+  signal:produces signal:carryWeaponKnife ;
+.
 signal:attenuatedBy
   a owl:ObjectProperty ;
   rdfs:domain signal:ReceiverModel ;
@@ -171,6 +191,27 @@ signal:breakWindowEmission
   a signal:Emission ;
   signal:creates signal:soundOfBreakingGlass ;
   signal:emissionAction signal:breakWindow ;
+.
+signal:camera1
+  a signal:Sensor ;
+  signal:loc signal:BCEast ;
+  signal:model signal:SSDMobileNetv2 ;
+.
+signal:carryCookingKnife
+  a signal:Action ;
+.
+signal:carryCookingKnifeEmission
+  a signal:Emission ;
+  signal:creates signal:visibleCookingKnife ;
+  signal:emissionAction signal:carryCookingKnife ;
+.
+signal:carryWeaponKnife
+  a signal:Action ;
+.
+signal:carryWeaponKnifeEmission
+  a signal:Emission ;
+  signal:creates signal:visibleWeaponKnife ;
+  signal:emissionAction signal:carryWeaponKnife ;
 .
 signal:composes
   a owl:ObjectProperty ;
@@ -225,6 +266,13 @@ signal:employeeBehaviour
   signal:pr 0.1 ;
   signal:produces signal:dropTray ;
 .
+signal:employeeBehaviourCarryCookingKnife
+  a signal:Behaviour ;
+  signal:actor signal:employee ;
+  signal:actsOn signal:diningArea ;
+  signal:pr 0.1 ;
+  signal:produces signal:carryCookingKnife ;
+.
 signal:fallOff
   a owl:ObjectProperty ;
   rdfs:domain signal:ReceiverModel ;
@@ -261,17 +309,32 @@ signal:locz
   rdfs:domain signal:Location ;
   rdfs:range xsd:decimal ;
 .
+signal:mAP
+  a owl:DatatypeProperty ;
+  rdfs:domain signal:ClassifierModel ;
+  rdfs:range xsd:decimal ;
+.
 signal:model
   a owl:ObjectProperty ;
   rdfs:domain signal:Sensor ;
   rdfs:range signal:SummarisationModel ;
+.
+signal:objectPrVector
+  a signal:SummarisedPrVector ;
 .
 signal:observation1
   a signal:Observation ;
   signal:observedBy signal:smartlavplusMicrophone ;
   signal:observedSignal signal:soundOfGlass ;
   signal:time "2022-04-26T11:53:00Z"^^xsd:dateTime ;
-  signal:value 1 ;
+  signal:value "1"^^xsd:decimal ;
+.
+signal:observation2
+  a signal:Observation ;
+  signal:observedBy signal:camera1 ;
+  signal:observedSignal signal:visibleKnife ;
+  signal:time "2022-04-26T11:53:00Z"^^xsd:dateTime ;
+  signal:value "1"^^xsd:decimal ;
 .
 signal:observedBy
   a owl:ObjectProperty ;
@@ -341,6 +404,7 @@ signal:soundPrVector
 .
 signal:soundReceiverModel
   a signal:ReceiverModel ;
+  signal:attenuatedBy signal:wall ;
   signal:attenuatedBy signal:window ;
   signal:composes signal:linear ;
   signal:detectedAs signal:soundOfGlass ;
@@ -369,6 +433,29 @@ signal:value
   a owl:DatatypeProperty ;
   rdfs:domain signal:Observation ;
   rdfs:range xsd:decimal ;
+.
+signal:visibleCookingKnife
+  a signal:Signal ;
+  skos:broader signal:visibleKnife ;
+.
+signal:visibleKnife
+  a signal:Signal ;
+  skos:broader signal:visibleObject ;
+.
+signal:visibleObject
+  a signal:Signal ;
+.
+signal:visibleWeaponKnife
+  a signal:Signal ;
+  skos:broader signal:visibleKnife ;
+.
+signal:visionReceiverModel
+  a signal:ReceiverModel ;
+  signal:attenuatedBy signal:wall ;
+  signal:composes signal:linear ;
+  signal:detectedAs signal:visibleKnife ;
+  signal:fallOff signal:inverseSquare ;
+  signal:producedBy signal:visibleKnife ;
 .
 signal:wall
   a signal:Barrier ;
