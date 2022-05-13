@@ -23,6 +23,11 @@ signal:Action
   a sh:NodeShape ;
   rdfs:subClassOf owl:Thing ;
 .
+signal:Actor
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf signal:Object ;
+.
 signal:BCEast
   a signal:Location ;
   signal:locx "1"^^xsd:decimal ;
@@ -94,7 +99,7 @@ signal:Observation
 signal:Person
   a owl:Class ;
   a sh:NodeShape ;
-  rdfs:subClassOf signal:Object ;
+  rdfs:subClassOf signal:Actor ;
 .
 signal:ReceiverModel
   a owl:Class ;
@@ -130,6 +135,11 @@ signal:SummarisationModel
   a sh:NodeShape ;
   rdfs:subClassOf owl:Thing ;
 .
+signal:SummarisedAsText
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf signal:SummarisedSignal ;
+.
 signal:SummarisedPrVector
   a owl:Class ;
   a sh:NodeShape ;
@@ -138,12 +148,25 @@ signal:SummarisedPrVector
 signal:SummarisedSignal
   a owl:Class ;
   a sh:NodeShape ;
-  rdfs:subClassOf owl:Thing ;
+  rdfs:subClassOf signal:Signal ;
+.
+signal:Trigger
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf signal:Actor ;
 .
 signal:accuracy
   a owl:DatatypeProperty ;
   rdfs:domain signal:ClassifierModel ;
   rdfs:range xsd:decimal ;
+.
+signal:actingSuspicious
+  a signal:Action ;
+.
+signal:actingSuspiciousEmission
+  a signal:Emission ;
+  signal:creates signal:appearActingSuspicious ;
+  signal:emissionAction signal:actingSuspicious ;
 .
 signal:actor
   a owl:ObjectProperty ;
@@ -155,6 +178,12 @@ signal:actsOn
   rdfs:domain signal:Behaviour ;
   rdfs:range signal:Object ;
 .
+signal:alarmingTweet
+  a signal:Signal ;
+.
+signal:appearActingSuspicious
+  a signal:Signal ;
+.
 signal:attacker
   a signal:Person ;
   signal:pr_exists 0.1 ;
@@ -165,6 +194,14 @@ signal:attackerBehaviour
   signal:actsOn signal:window ;
   signal:pr 0.5 ;
   signal:produces signal:breakWindow ;
+.
+signal:attackerBehaviourActSuspicious
+  a signal:Behaviour ;
+  signal:actor signal:attacker ;
+  signal:actsOn signal:diningArea ;
+  signal:actsOn signal:window ;
+  signal:pr 0.5 ;
+  signal:produces signal:actingSuspicious ;
 .
 signal:attackerBehaviourCarryWeaponKnife
   a signal:Behaviour ;
@@ -191,6 +228,14 @@ signal:breakWindowEmission
   a signal:Emission ;
   signal:creates signal:soundOfBreakingGlass ;
   signal:emissionAction signal:breakWindow ;
+.
+signal:bystanderReceiverModel
+  a signal:ReceiverModel ;
+  signal:attenuatedBy signal:wall ;
+  signal:composes signal:linear ;
+  signal:detectedAs signal:appearActingSuspicious ;
+  signal:fallOff signal:inverseSquare ;
+  signal:producedBy signal:appearActingSuspicious ;
 .
 signal:camera1
   a signal:Sensor ;
@@ -278,6 +323,10 @@ signal:fallOff
   rdfs:domain signal:ReceiverModel ;
   rdfs:range signal:FallOff ;
 .
+signal:goodFaithAlarmingTweet
+  a signal:Signal ;
+  skos:broader signal:alarmingTweet ;
+.
 signal:input
   a owl:ObjectProperty ;
   rdfs:domain signal:SummarisationModel ;
@@ -336,6 +385,13 @@ signal:observation2
   signal:time "2022-04-26T11:53:00Z"^^xsd:dateTime ;
   signal:value "1"^^xsd:decimal ;
 .
+signal:observation3
+  a signal:Observation ;
+  signal:observedBy signal:twitterMonitor ;
+  signal:observedSignal signal:alarmingTweet ;
+  signal:time "2022-04-26T11:53:00Z"^^xsd:dateTime ;
+  signal:value "1"^^xsd:decimal ;
+.
 signal:observedBy
   a owl:ObjectProperty ;
   rdfs:domain signal:Observation ;
@@ -351,6 +407,17 @@ signal:outputs
   rdfs:domain signal:SummarisationModel ;
   rdfs:range signal:SummarisedSignal ;
 .
+signal:performPrank
+  a signal:Action ;
+.
+signal:performTweetEmission
+  a signal:Emission ;
+  signal:creates signal:goodFaithAlarmingTweet ;
+  signal:emissionAction signal:perfromTweet ;
+.
+signal:perfromTweet
+  a signal:Action ;
+.
 signal:pr
   a owl:DatatypeProperty ;
   rdfs:domain signal:Behaviour ;
@@ -360,6 +427,27 @@ signal:pr_exists
   a owl:DatatypeProperty ;
   rdfs:domain signal:Person ;
   rdfs:range xsd:decimal ;
+.
+signal:prankAlarmingTweet
+  a signal:Signal ;
+  skos:broader signal:alarmingTweet ;
+.
+signal:prankTweetEmission
+  a signal:Emission ;
+  signal:creates signal:prankAlarmingTweet ;
+  signal:emissionAction signal:performPrank ;
+.
+signal:prankster
+  a signal:Person ;
+  signal:pr_exists 0.1 ;
+.
+signal:pranksterBehaviourPerformPrank
+  a signal:Behaviour ;
+  signal:actor signal:prankster ;
+  signal:actsOn signal:diningArea ;
+  signal:actsOn signal:window ;
+  signal:pr 0.5 ;
+  signal:produces signal:performPrank ;
 .
 signal:producedBy
   a owl:ObjectProperty ;
@@ -386,6 +474,11 @@ signal:smartlavplusMicrophone
   signal:loc signal:BCEast ;
   signal:model signal:yamnet ;
   signal:signalToNoiseRatio "67"^^xsd:decimal ;
+.
+signal:socialSensor
+  a signal:Sensor ;
+  signal:loc signal:BCEast ;
+  signal:model signal:tweetModel ;
 .
 signal:soundOfBreakingGlass
   a signal:Signal ;
@@ -419,6 +512,13 @@ signal:specificity
   rdfs:domain signal:ClassifierModel ;
   rdfs:range xsd:decimal ;
 .
+signal:textClassifier
+  a signal:ClassifierModel ;
+  signal:input signal:alarmingTweet ;
+  signal:outputs signal:tweetTopicPrVector ;
+  signal:sensitivity 0.9 ;
+  signal:specificity 0.9 ;
+.
 signal:time
   a owl:DatatypeProperty ;
   rdfs:domain signal:Observation ;
@@ -428,6 +528,46 @@ signal:trainedOn
   a owl:ObjectProperty ;
   rdfs:domain signal:ClassifierModel ;
   rdfs:range signal:Dataset ;
+.
+signal:triggerSensor
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Trigger ;
+  rdfs:range signal:Sensor ;
+.
+signal:triggerSignal
+  a owl:ObjectProperty ;
+  rdfs:domain signal:Trigger ;
+  rdfs:range signal:Signal ;
+.
+signal:triggerTweetBehaviour
+  a signal:Behaviour ;
+  signal:actor signal:tweetTrigger ;
+  signal:actsOn signal:window ;
+  signal:pr "1"^^xsd:decimal ;
+  signal:produces signal:perfromTweet ;
+.
+signal:tweetIntent
+  a signal:SummarisedAsText ;
+.
+signal:tweetModel
+  a signal:ClassifierModel ;
+  signal:input signal:appearActingSuspicious ;
+  signal:outputs signal:tweetIntent ;
+  signal:sensitivity 0.5 ;
+  signal:specificity 0.95 ;
+.
+signal:tweetTopicPrVector
+  a signal:SummarisedPrVector ;
+.
+signal:tweetTrigger
+  a signal:Trigger ;
+  signal:triggerSensor signal:socialSensor ;
+  signal:triggerSignal signal:appearActingSuspicious ;
+.
+signal:twitterMonitor
+  a signal:Sensor ;
+  signal:loc signal:BCEast ;
+  signal:model signal:textClassifier ;
 .
 signal:value
   a owl:DatatypeProperty ;

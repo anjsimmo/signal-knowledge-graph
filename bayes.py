@@ -1,4 +1,6 @@
 import random
+import re
+
 
 def id_gen():
     id = 0
@@ -14,7 +16,7 @@ def name_gen():
 def default_name(name):
     if name == None:
         return name_gen()
-    return name
+    return str(name) # ensure name is string
 
 class BayesGraph:
     def __init__(self):
@@ -39,6 +41,8 @@ class BayesGraph:
         return s
     
     def get_posterior(self, node, node_output_val, sims_count=1000, min_sample = 1):
+        assert node_output_val in node.get_output_vals() # check that it is actually possible to output value
+        
         # Inefficient, but demonstrates concept
         sims = []
         valid_sims = []
@@ -84,6 +88,10 @@ class BayesGraph:
                 sampled_values[n] = val
                 change = True
             if not change:
+                # Ensure all nodes were sampled
+                # (this could fail if there are disconnected nodes in graph)
+                for n in self.nodes:
+                    assert n in sampled_values
                 break
         
         return sampled_values
@@ -141,6 +149,45 @@ probability ( {n.name} | {", ".join(n.condition_node_names)} ) """ + "{"
 
         for n in self.nodes:
             n.condition_node_names = [cn.name for cn in n.condition_nodes]
+    
+    def load_bif(self, bif):
+        # nodes
+        ms = re.finditer(r"^variable (?P<name>\w+) {\n  type discrete \[ \d* \] { (?P<varlist>[\w., ]*) }", bif, re.MULTILINE)
+        for m in ms:
+            d = m.groupdict()
+            n = BayesNode(d["name"])
+            for var in d["varlist"].split(", "):
+                n.add_output_value(var)
+            self.add_node(n)
+
+        # probability tables
+        ms = re.finditer(r"^probability \( (?P<name>\w+) \) {\n  table (?P<row>[\w., ]*);", bif, re.MULTILINE)
+        for m in ms:
+            d = m.groupdict()
+            n = self.get_node(d["name"])
+            row_vals = d["row"].split(", ")
+            n.add_row([], [float(f) for f in row_vals])
+
+        # conditional probability tables
+        ms = re.finditer(r"^probability \( (?P<name>\w+) \| (?P<conditionlist>[\w, ]+) \) {\n(?P<rows>(.*;\n)*)}$", bif, re.MULTILINE)
+        for m in ms:
+            d = m.groupdict()
+            n = self.get_node(d["name"])
+            for condition_name in d["conditionlist"].split(", "):
+                cn = self.get_node(condition_name)
+                n.add_condition(cn)
+            rows = d["rows"].split("\n")
+            for row in rows:
+                if row == "":
+                    continue
+                d = re.search(r"^\s*\((?P<conditions>[\w\., ]+)\) (?P<vals>[\w\., ]+);", row).groupdict()
+                conditions = d["conditions"].split(", ")
+                vals = d["vals"].split(", ")
+                n.add_row(conditions, [float(f) for f in vals])
+
+    def _dump(self):
+        # dump internal values (for debugging purposes)
+        return [[n._dump() for n in self.nodes], [(k,v.name) for k,v in self.node_name_index.items()]]
 
 # conditional probability table
 # Designed to be similar to tool at http://www.cs.man.ac.uk/~gbrown/bayes_nets
@@ -165,12 +212,17 @@ class BayesNode:
         self.output_vals.append(name)
     
     def add_row(self, condition_vals, output_value_prs):
+        output_value_prs = [float(x) for x in output_value_prs] # ensure prs are floats
+        condition_vals = [str(x) for x in condition_vals]
         row = (condition_vals, output_value_prs)
         self.rows.append(row)
+        assert tuple(condition_vals) not in self.condition_to_prs # ensure no dup rows
         self.condition_to_prs[tuple(condition_vals)] = output_value_prs
     
     def fix_value(self, output_value):
         # Fixed observation value
+        output_value = str(output_value)
+        assert output_value in self.output_vals
         self.fixed_value = output_value
     
     def get_output_vals(self):
@@ -195,3 +247,7 @@ class BayesNode:
             s += f"fixed value: {self.fixed_value}" + "\n" 
 
         return s
+    
+    def _dump(self):
+        # dump internal values (for debugging purposes)
+        return [self.name, [cn.name for cn in self.condition_nodes], self.condition_node_names, self.output_vals, self.rows, self.fixed_value, self.condition_to_prs, self.shortname]

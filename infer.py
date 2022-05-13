@@ -2,6 +2,7 @@ import math
 import itertools
 from collections import namedtuple
 from rdflib import Graph, Namespace, RDF, SKOS
+from rdflib.exceptions import UniquenessError
 from bayes import BayesGraph, BayesNode
 
 g = Graph()
@@ -43,21 +44,55 @@ def get_name(uriref):
 
 
 def pr_actor(causal_graph):
-    persons = list(g.subjects(RDF.type, signal.Person))
     nodes = []
-    for person in persons:
-        pr_exists = float(g.value(person, signal.pr_exists).value)
+
+    for person in g.subjects(RDF.type, signal.Person):
         n = BayesNode(get_name(person))
         n.add_output_value(1)
         n.add_output_value(0)
+        pr_exists = float(g.value(person, signal.pr_exists))
         n.add_row([],[pr_exists,1-pr_exists])
         nodes.append(n)
+
+    for trigger in g.subjects(RDF.type, signal.Trigger):
+        n = BayesNode(get_name(trigger))
+        n.add_output_value(1)
+        n.add_output_value(0)
+        # Will create the probability table later (once rest of graph is created)
+        assert len(list(g.objects(trigger, signal.triggerSensor))) > 0
+        assert len(list(g.objects(trigger, signal.triggerSignal))) > 0
+        nodes.append(n)
+
     return nodes
+
+
+def link_triggers(causal_graph):
+    nodes = []
+    for actor in g.subjects(RDF.type, signal.Trigger):
+        actor_node = causal_graph.get_node(get_name(actor))
+        trigger_sensors = list(g.objects(actor, signal.triggerSensor))
+        trigger_signals = list(g.objects(actor, signal.triggerSignal))
+        assert trigger_sensors
+        assert trigger_signals
+        for sensor in trigger_sensors:
+            for observed_signal in trigger_signals:
+                sensor_node = causal_graph.get_node("det_" + get_name(sensor) + "_" + get_name(observed_signal))
+                actor_node.add_condition(sensor_node)
+        # Implement OR condition
+        # [(0, 0, 0, 0, 0), (0, 0, 0, 0, 1), ...]
+        combos = itertools.product([0,1], repeat=len(actor_node.condition_nodes))
+        for combo in combos:
+            if 1 in combo:
+                # 1 or more 1s => true
+                actor_node.add_row(combo,[1,0])
+            else:
+                # all 0s => false
+                actor_node.add_row(combo,[0,1])
 
 
 def pr_action_given_actor(causal_graph):
     nodes = []
-    for actor in g.subjects(RDF.type, signal.Person):
+    for actor in (list(g.subjects(RDF.type, signal.Person)) + list(g.subjects(RDF.type, signal.Trigger))):
         behaviours = list(g.subjects(signal.actor, actor))
         for behaviour in behaviours:
             # Should be of type Behaviour
@@ -220,7 +255,7 @@ def pr_det_given_signal_strength(causal_graph):
     for sensor, observed_signal, sensitivity, specificity in sensor_obs:
         #print("DEBUG: " + "_signal_" + get_name(observed_signal) + "_" + get_name(sensor) + "_strength")
         
-        narrower_signals = get_narrower_signals(observed_signal)
+        narrower_signals = [observed_signal] + list(get_narrower_signals(observed_signal))
         strength_nodes = []
         for sig in narrower_signals:
             strength_nodes += causal_graph.get_nodes("_signal_" + get_name(sig) + "_" + get_name(sensor) + "_strength")
@@ -232,25 +267,15 @@ def pr_det_given_signal_strength(causal_graph):
         n.add_output_value(1)
         n.add_output_value(0)
         
-        # [(0, 0, 0, 0, 0), (0, 0, 0, 0, 1), ...]
-        #combos = itertools.product([0,1], repeat=len(strength_nodes))
         strength_combos = []
+
         for sn in strength_nodes:
             strength_combos.append(sn.output_vals)
-        combos = itertools.product(*strength_combos)
-        for combo in combos:
-            row_condition = list(combo)
 
-            # strengths = []
-            # for i, c in enumerate(combo):
-            #     if c == 0:
-            #         continue
-            #     strengths.append(strength_nodes[i].strength)
-            # max_strenth = max([0] + strengths)
-            
-            max_strenth = max([0] + row_condition)
+        for combo in itertools.product(*strength_combos):
+            row_condition = list(combo)
+            max_strenth = max([0] + [float(x) for x in row_condition])
             pr_det = pr_det_given_signal_strength_helper(max_strenth, 1, sensitivity, specificity)
-            
             n.add_row(row_condition,[pr_det, 1 - pr_det])
 
         n.shortname = "detect" + _capitalise(get_name(observed_signal))
@@ -294,6 +319,8 @@ def gen_causal_graph():
     for n in det_nodes:
         causal_graph.add_node(n)
     
+    link_triggers(causal_graph)
+
     return causal_graph
 
 
@@ -320,17 +347,17 @@ def infer_actor_pr(causal_graph, actor_name, actor_val):
 
 def monitor_step():
     alarm = Alarm()
-        
+
     causal_graph = gen_causal_graph()
     fix_observation_values(causal_graph)
-    
-    posterior_cause = infer_actor_pr(causal_graph, "attacker", 1)
+
+    posterior_cause = infer_actor_pr(causal_graph, "attacker", "1")
+    msg = f"Attacker in {posterior_cause.num_hypo}/{posterior_cause.num_valid} sims => Pr(attacker) = {posterior_cause.pr}"
+    alarm.warn(posterior_cause.pr, msg)
     if posterior_cause.pr > 0.5:
         alarm.alert()
-    if posterior_cause.pr > 0:
-        msg = f"Attacker in {posterior_cause.num_hypo}/{posterior_cause.num_valid} sims => Pr(attacker) = {posterior_cause.pr}"
-        alarm.warn(posterior_cause.pr, msg)
     return alarm, causal_graph
+
 
 if __name__ == "__main__":
     alarm, causal_graph = monitor_step()
@@ -341,3 +368,6 @@ if __name__ == "__main__":
     
     with open("infer.bif", "w") as f:
         f.write(causal_graph.to_bif())
+
+    with open("infer.dump", "w") as f:
+        f.write(str(causal_graph._dump()))
