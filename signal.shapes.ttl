@@ -198,7 +198,6 @@ signal:attackerBehaviour
 signal:attackerBehaviourActSuspicious
   a signal:Behaviour ;
   signal:actor signal:attacker ;
-  signal:actsOn signal:diningArea ;
   signal:actsOn signal:window ;
   signal:pr 0.5 ;
   signal:produces signal:actingSuspicious ;
@@ -206,7 +205,6 @@ signal:attackerBehaviourActSuspicious
 signal:attackerBehaviourCarryWeaponKnife
   a signal:Behaviour ;
   signal:actor signal:attacker ;
-  signal:actsOn signal:diningArea ;
   signal:actsOn signal:window ;
   signal:pr 0.5 ;
   signal:produces signal:carryWeaponKnife ;
@@ -444,7 +442,6 @@ signal:prankster
 signal:pranksterBehaviourPerformPrank
   a signal:Behaviour ;
   signal:actor signal:prankster ;
-  signal:actsOn signal:diningArea ;
   signal:actsOn signal:window ;
   signal:pr 0.5 ;
   signal:produces signal:performPrank ;
@@ -555,6 +552,12 @@ signal:tweetModel
   signal:outputs signal:tweetIntent ;
   signal:sensitivity 0.5 ;
   signal:specificity 0.95 ;
+.
+signal:tweetReceiverModel
+  a signal:ReceiverModel ;
+  signal:composes signal:linear ;
+  signal:detectedAs signal:alarmingTweet ;
+  signal:producedBy signal:alarmingTweet ;
 .
 signal:tweetTopicPrVector
   a signal:SummarisedPrVector ;
