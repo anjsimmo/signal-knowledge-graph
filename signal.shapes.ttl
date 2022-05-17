@@ -26,7 +26,7 @@ signal:Action
 signal:Actor
   a owl:Class ;
   a sh:NodeShape ;
-  rdfs:subClassOf signal:Object ;
+  rdfs:subClassOf signal:Entity ;
 .
 signal:BCEast
   a signal:Location ;
@@ -41,7 +41,7 @@ signal:BCSouthEast
 signal:Barrier
   a owl:Class ;
   a sh:NodeShape ;
-  rdfs:subClassOf signal:Object ;
+  rdfs:subClassOf signal:Entity ;
 .
 signal:Behaviour
   a owl:Class ;
@@ -71,6 +71,11 @@ signal:Emission
   a sh:NodeShape ;
   rdfs:subClassOf owl:Thing ;
 .
+signal:Entity
+  a owl:Class ;
+  a sh:NodeShape ;
+  rdfs:subClassOf owl:Thing ;
+.
 signal:FallOff
   a owl:Class ;
   a sh:NodeShape ;
@@ -82,11 +87,6 @@ signal:Flux
   rdfs:subClassOf owl:Thing ;
 .
 signal:Location
-  a owl:Class ;
-  a sh:NodeShape ;
-  rdfs:subClassOf owl:Thing ;
-.
-signal:Object
   a owl:Class ;
   a sh:NodeShape ;
   rdfs:subClassOf owl:Thing ;
@@ -118,7 +118,7 @@ signal:SSDMobileNetv2
 signal:Sensor
   a owl:Class ;
   a sh:NodeShape ;
-  rdfs:subClassOf signal:Object ;
+  rdfs:subClassOf signal:Entity ;
 .
 signal:Signal
   a owl:Class ;
@@ -128,7 +128,7 @@ signal:Signal
 signal:Space
   a owl:Class ;
   a sh:NodeShape ;
-  rdfs:subClassOf signal:Object ;
+  rdfs:subClassOf signal:Entity ;
 .
 signal:SummarisationModel
   a owl:Class ;
@@ -171,12 +171,12 @@ signal:actingSuspiciousEmission
 signal:actor
   a owl:ObjectProperty ;
   rdfs:domain signal:Behaviour ;
-  rdfs:range signal:Object ;
+  rdfs:range signal:Entity ;
 .
 signal:actsOn
   a owl:ObjectProperty ;
   rdfs:domain signal:Behaviour ;
-  rdfs:range signal:Object ;
+  rdfs:range signal:Entity ;
 .
 signal:alarmingTweet
   a signal:Signal ;
@@ -212,7 +212,7 @@ signal:attackerBehaviourCarryWeaponKnife
 signal:attenuatedBy
   a owl:ObjectProperty ;
   rdfs:domain signal:ReceiverModel ;
-  rdfs:range signal:Object ;
+  rdfs:range signal:Entity ;
 .
 signal:audioset
   a signal:Dataset ;
@@ -338,7 +338,7 @@ signal:linear
 .
 signal:loc
   a owl:ObjectProperty ;
-  rdfs:domain signal:Object ;
+  rdfs:domain signal:Entity ;
   rdfs:range signal:Location ;
 .
 signal:locx
