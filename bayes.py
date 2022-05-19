@@ -18,6 +18,7 @@ def default_name(name):
         return name_gen()
     return str(name) # ensure name is string
 
+
 class BayesGraph:
     def __init__(self):
         self.nodes = []
@@ -188,6 +189,7 @@ probability ( {n.name} | {", ".join(n.condition_node_names)} ) """ + "{"
     def _dump(self):
         # dump internal values (for debugging purposes)
         return [[n._dump() for n in self.nodes], [(k,v.name) for k,v in self.node_name_index.items()]]
+
 
 # conditional probability table
 # Designed to be similar to tool at http://www.cs.man.ac.uk/~gbrown/bayes_nets

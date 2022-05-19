@@ -1,5 +1,6 @@
 from bayes import BayesGraph, BayesNode
 
+
 # Test load of earthquake bif file
 # https://www.bnlearn.com/bnrepository/discrete-small.html#earthquake
 

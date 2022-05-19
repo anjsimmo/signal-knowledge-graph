@@ -1,5 +1,6 @@
 from bayes import BayesGraph, BayesNode
 
+
 # burgulary/alarm example
 # http://www.cs.man.ac.uk/~gbrown/bayes_nets (wrong values for burgulary)
 # https://www.bnlearn.com/bnrepository/discrete-small.html#earthquake (values used for this example)

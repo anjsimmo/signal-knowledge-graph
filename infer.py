@@ -5,31 +5,11 @@ from rdflib import Graph, Namespace, RDF, SKOS
 from rdflib.exceptions import UniquenessError
 from bayes import BayesGraph, BayesNode
 
+
+SIGNAL_KG_FILE = 'signal.ttl'
+
 g = Graph()
-g.parse('signal.shapes.ttl', format='ttl')
-
-# import pprint
-# for stmt in g:
-#     pprint.pprint(stmt)
-
-# V1
-# Simulate all possible universes
-# Filter to those consistent with observations
-# calculate posterior pr
-
-
-# V2
-# Generate bayesian graph
-# SNR vs Pr
-# (high, med, low)
-# - would still require heuristic!
-
-# V3
-# Assume discrete output
-# Gen bayesian graph (with some parts as functions)
-# Brute force to solve
-
-
+g.parse(SIGNAL_KG_FILE, format='ttl')
 signal = Namespace("http://a2i2.deakin.edu.au/signal#")
 Posterior = namedtuple("Posterior", ["pr", "num_hypo", "num_valid"])
 
@@ -101,10 +81,8 @@ def pr_action_given_actor(causal_graph):
             actions = g.objects(behaviour, signal.produces)
             acts_on = g.objects(behaviour, signal.actsOn)
             locations = [g.value(ao, signal.loc) for ao in acts_on]
-            #results += [(action, pr, actor, loc) for action in actions for loc in locations]
             for action in actions:
                 for loc in locations:
-                     # action, pr, actor, loc
                      n = BayesNode(get_name(actor) + "_" + get_name(action) + "_" + get_name(loc))
                      actor_node = causal_graph.get_node(get_name(actor))
                      n.actor = actor
@@ -126,7 +104,6 @@ def pr_signal_given_action(causal_graph):
     for emission in emissions:
         signals = g.objects(emission, signal.creates)
         actions = g.objects(emission, signal.emissionAction)
-        #results += [(sig, action) for action in actions for sig in signals]
         for sig in signals:
             for action in actions:
                 for action_node in causal_graph.get_nodes("_" + get_name(action) + "_"):
@@ -163,7 +140,6 @@ def dist(loca, locb):
 
 
 def pr_signal_strength_given_signal(causal_graph):
-    # TODO: Get action locations!!!!
     sensors = list(g.subjects(RDF.type, signal.Sensor))
     
     sensor_locs = []
@@ -229,8 +205,6 @@ def get_broader_signals(observed_signal):
 
 def pr_det_given_signal_strength_helper(sig_strength, ref_signal, sensitivity, specificity):
     # TODO: depends on whether using power, or decibel scale
-    # assert sensitivity >= 0.5
-    # assert specificity >= 0.5
     # TODO: plot this curve to make sure it looks right
     tpr = sensitivity
     fpr = 1 - specificity
@@ -253,8 +227,6 @@ def pr_det_given_signal_strength(causal_graph):
 
     nodes = []
     for sensor, observed_signal, sensitivity, specificity in sensor_obs:
-        #print("DEBUG: " + "_signal_" + get_name(observed_signal) + "_" + get_name(sensor) + "_strength")
-        
         narrower_signals = [observed_signal] + list(get_narrower_signals(observed_signal))
         strength_nodes = []
         for sig in narrower_signals:
