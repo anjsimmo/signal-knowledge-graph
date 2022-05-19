@@ -1,9 +1,6 @@
 from bayes import BayesGraph, BayesNode
 
 
-# Test load of earthquake bif file
-# https://www.bnlearn.com/bnrepository/discrete-small.html#earthquake
-
 bg = BayesGraph()
 with open("infer.bif", "r") as f:
     bif = f.read()
