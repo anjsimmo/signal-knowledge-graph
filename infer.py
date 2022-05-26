@@ -102,8 +102,8 @@ def pr_signal_given_action(causal_graph):
     emissions = g.subjects(RDF.type, signal.Emission)
     nodes = []
     for emission in emissions:
-        signals = g.objects(emission, signal.creates)
-        actions = g.objects(emission, signal.emissionAction)
+        signals = list(g.objects(emission, signal.creates))
+        actions = list(g.objects(emission, signal.emissionAction))
         for sig in signals:
             for action in actions:
                 for action_node in causal_graph.get_nodes("_" + get_name(action) + "_"):
